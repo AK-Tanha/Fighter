@@ -22,4 +22,10 @@ export class Fighter {
 
   @Column({ type: 'varchar' })
   weight_class!: string;
+
+  @Column({ type: 'json' })
+  weight?: {
+    value: number;
+    updated_at: Date;
+  };
 }
