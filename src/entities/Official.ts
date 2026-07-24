@@ -1,7 +1,8 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+import { Bout } from './Bout.js';
 
 @Entity()
-export class Referee {
+export class Official {
   @PrimaryGeneratedColumn()
   id!: number;
 
@@ -16,5 +17,11 @@ export class Referee {
 
   @Column({ type: 'boolean', nullable: true })
   is_active?: boolean;
+
+  @OneToMany(() => Bout, (bout) => bout.referee)
+  bouts!: Bout[];
+
+  @Column({ type: 'simple-array' })
+  certified_roles!: ('referee' | 'judge')[];
 
 }

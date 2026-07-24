@@ -1,4 +1,5 @@
-import { Entity, PrimaryGeneratedColumn, Column } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Bout } from "./Bout.js";
 
 @Entity()
 export class Event {
@@ -17,10 +18,13 @@ export class Event {
     @Column({ type: 'date' })
     date!: string;
 
+    @OneToMany(() => Bout, (bout) => bout.event) 
+    bouts!: Bout[];
+
     @Column({ type: 'varchar' })
     location!: string;
 
-    @Column({ type: 'array', nullable: true })
+    @Column({ type: 'simple-array', nullable: true })
     bout_ids!: string[];
 
     @Column({ type: 'numeric'})

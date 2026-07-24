@@ -1,11 +1,11 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../lib/data-source.js";
-import { Referee } from "../entities/Referee.js";
+import { Official } from "../entities/Official.js";
 
-const refRepo = AppDataSource.getRepository(Referee);
+const officialRepo = AppDataSource.getRepository(Official);
 
 export const getReferees = async (req: Request, res: Response) => {
-   const referees = await refRepo.find();
+   const referees = await officialRepo.find();
    res.status(200).json({
        success: true,
        message: "Referees fetched successfully",
@@ -19,8 +19,8 @@ export const createReferee = async (
 ) => {
     try {
         const { name,nationality, date_of_birth, is_active } = req.body;
-        const referee = await refRepo.save(
-            refRepo.create({
+        const referee = await officialRepo.save(
+            officialRepo.create({
                 name,
                 nationality,
                 date_of_birth,
@@ -43,7 +43,7 @@ export const createReferee = async (
 export const getRefereeById = async (req: Request, res: Response) => {
     try {
         const id  = Number(req.params.id);
-        const referee = await refRepo.findOneBy({ id });
+        const referee = await officialRepo.findOneBy({ id });
         if (!referee) {
             return res.status(404).json({
                 success: false,
@@ -67,7 +67,7 @@ export const editReferee = async (req: Request, res: Response) => {
     try {
         const id  = Number(req.params.id);
         const { name, nationality, date_of_birth, is_active } = req.body;
-        const referee = await refRepo.update(
+        const referee = await officialRepo.update(
             { id },
             {
                 name,
@@ -92,7 +92,7 @@ export const editReferee = async (req: Request, res: Response) => {
 export const deleteReferee = async (req: Request, res: Response) => {
     try {
         const id  = Number(req.params.id);
-        const referee = await refRepo.delete({
+        const referee = await officialRepo.delete({
             id
         });
         res.status(200).json({

@@ -1,4 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, ManyToMany, JoinTable } from 'typeorm';
+import { Official } from './Official.js';
+import { Event } from './Event.js';
+
 
 @Entity()
 export class Bout {
@@ -12,13 +15,18 @@ export class Bout {
   blue_corner_fighter_id!: string;
 
   @Column({ type: 'varchar' })
-  event_id ?: string;
+  event_id?: string;
 
-  @Column({ type: 'varchar' })
-  referee_id!: string;
+  @ManyToOne(() => Official)
+  referee!: Official; // this person is refereeing THIS bout
 
-  @Column({ type: 'array' })
-  judges_ids!: string[];
+  @ManyToMany(() => Official)
+  @JoinTable()
+  judges!: Official[]; // these people are judging THIS bout
+
+  @ManyToOne(() => Event, (event) => event.bouts)
+  @JoinColumn({ name: 'event_id' })
+  event!: Event;
 
   @Column({ type: 'boolean' })
   is_title_fight!: boolean;
@@ -45,6 +53,12 @@ export class Bout {
     other_notes: string;
 
   };
-  
+
+  @Column({ type: 'json' })
+  judges_scores!: {
+    judge_id: string;
+    red_corner_score: number;
+    blue_corner_score: number;
+  }[];
 
 }

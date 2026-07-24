@@ -20,10 +20,13 @@ export class Fighter {
   @Column({ type: 'date', nullable: true })
   date_of_birth?: string;
 
-  @Column({ type: 'varchar' })
+  @Column({ type: 'varchar', nullable: true })
   weight_class!: string;
 
-  @Column({ type: 'json' })
+  @Column({type: 'varchar', nullable: true})
+  gender!: 'male' | 'female';
+
+  @Column({ type: 'simple-json', nullable: true})
   weight?: {
     value: number;
     updated_at: Date;
