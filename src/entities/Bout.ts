@@ -1,6 +1,7 @@
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, ManyToMany, JoinTable } from 'typeorm';
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, ManyToMany, JoinTable, OneToMany } from 'typeorm';
 import { Official } from './Official.js';
 import { Event } from './Event.js';
+import { Round } from './Round.js';
 
 
 @Entity()
@@ -51,7 +52,6 @@ export class Bout {
     is_stopage: boolean;
     stopage_time: string;
     other_notes: string;
-
   };
 
   @Column({ type: 'json' })
@@ -60,5 +60,8 @@ export class Bout {
     red_corner_score: number;
     blue_corner_score: number;
   }[];
+
+  @OneToMany(() => Round, (round) => round.bout)
+  rounds!: Round[];
 
 }
