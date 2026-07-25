@@ -19,7 +19,7 @@ export const createFighter = async (
     res: Response
 ) => {
     try {
-        const { name, nickname, nationality, club, date_of_birth, weight_class } = req.body;
+        const { name, nickname, nationality, club, date_of_birth, weight_class, weight, gender } = req.body;
         const fighter = await fighterRepo.save(
             fighterRepo.create({
                 name,
@@ -27,7 +27,12 @@ export const createFighter = async (
                 nationality,
                 club,
                 date_of_birth,
-                weight_class
+                gender,
+                weight_class,
+                weight: {
+                    value: weight.value,
+                    updated_at: new Date()
+                }
             })
         );
         res.status(201).json({
@@ -70,7 +75,7 @@ export const getFighterById = async (req: Request, res: Response) => {
 export const editFighter = async (req: Request, res: Response) => {
     try {
         const id  = Number(req.params.id);
-        const { name, nickname, nationality, club, date_of_birth, weight_class } = req.body;
+        const { name, nickname, nationality, club, date_of_birth, weight_class, weight, gender } = req.body;
         const fighter = await fighterRepo.update(
             { id },
             {
@@ -79,7 +84,12 @@ export const editFighter = async (req: Request, res: Response) => {
                 nationality,
                 club,
                 date_of_birth,
-                weight_class
+                weight_class,
+                gender,
+                weight: {
+                    value: weight.value,
+                    updated_at: new Date()
+                }
             }
         );
         res.status(200).json({

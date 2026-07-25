@@ -21,9 +21,13 @@ export class Bout {
   @ManyToOne(() => Official)
   referee!: Official; // this person is refereeing THIS bout
 
-  @ManyToMany(() => Official)
+  /* @ManyToMany(() => Official)
   @JoinTable()
-  judges!: Official[]; // these people are judging THIS bout
+  judges!: Official[]; // these people are judging THIS bout */
+ 
+  @ManyToMany(() => Official, (official) => official.judgedBouts)
+  @JoinTable()
+  judges!: Official[];
 
   @ManyToOne(() => Event, (event) => event.bouts)
   @JoinColumn({ name: 'event_id' })
@@ -63,5 +67,6 @@ export class Bout {
 
   @OneToMany(() => Round, (round) => round.bout)
   rounds!: Round[];
+
 
 }
