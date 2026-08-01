@@ -2,6 +2,7 @@ import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, JoinColumn, ManyToMa
 import { Official } from './Official.js';
 import { Event } from './Event.js';
 import { Round } from './Round.js';
+import { Fighter } from './Fighter.js';
 
 
 @Entity()
@@ -9,22 +10,18 @@ export class Bout {
   @PrimaryGeneratedColumn()
   id!: number;
 
-  @Column({ type: 'varchar' })
-  red_corner_fighter_id!: string;
+  @ManyToOne(() => Fighter, { nullable: false })
+  @JoinColumn({ name: 'red_corner_fighter_id' })
+  red_corner_fighter!: Fighter;
 
-  @Column({ type: 'varchar' })
-  blue_corner_fighter_id!: string;
+  @ManyToOne(() => Fighter, { nullable: false })
+  @JoinColumn({ name: 'blue_corner_fighter_id' })
+  blue_corner_fighter!: Fighter;
 
-  @Column({ type: 'varchar' })
-  event_id?: string;
 
-  @ManyToOne(() => Official)
+  @ManyToOne(() => Official, (official) => official.refereedBouts, { nullable: false })
   referee!: Official; // this person is refereeing THIS bout
 
-  /* @ManyToMany(() => Official)
-  @JoinTable()
-  judges!: Official[]; // these people are judging THIS bout */
- 
   @ManyToMany(() => Official, (official) => official.judgedBouts)
   @JoinTable()
   judges!: Official[];
@@ -42,31 +39,13 @@ export class Bout {
   @Column({ type: 'boolean' })
   is_co_main_event!: boolean;
 
-  @Column({ type: 'numeric' })
-  no_of_rounds!: string;
+  @Column({ type: 'int' })
+  no_of_rounds!: number;
 
-  @Column({ type: 'numeric' })
-  round_time!: string;
-
-  @Column({ type: 'json' })
-  results!: {
-    red_corner_score: number;
-    blue_corner_score: number;
-    winner: 'red' | 'blue' | 'draw';
-    is_stopage: boolean;
-    stopage_time: string;
-    other_notes: string;
-  };
-
-  @Column({ type: 'json' })
-  judges_scores!: {
-    judge_id: string;
-    red_corner_score: number;
-    blue_corner_score: number;
-  }[];
+  @Column({ type: 'int' })
+  round_time!: number;
 
   @OneToMany(() => Round, (round) => round.bout)
   rounds!: Round[];
-
 
 }

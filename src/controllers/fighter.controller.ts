@@ -95,7 +95,7 @@ export const editFighter = async (req: Request, res: Response) => {
         res.status(200).json({
             success: true,
             message: "Fighter updated successfully",
-            data: Fighter
+            data: fighter
         });
     } catch (error) {
         res.status(500).json({
