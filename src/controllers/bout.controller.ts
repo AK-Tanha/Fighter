@@ -102,6 +102,12 @@ export const updateBout = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
         const { red_corner_fighter, blue_corner_fighter, event, referee, judges, is_title_fight, is_main_event, is_co_main_event } = req.body;
+
+        const bout = await boutRepo.findOne({ where: { id } });
+        if (!bout) {
+            return res.status(404).json({ success: false, message: "Bout not found" });
+        }
+
         const redFighter = await fighterRepo.findOneBy({ id: red_corner_fighter });
         if (!redFighter) {
             return res.status(404).json({ success: false, message: "Red corner fighter not found" });
@@ -122,7 +128,8 @@ export const updateBout = async (req: Request, res: Response) => {
         if (boutJudges.length !== judges.length) {
             return res.status(404).json({ success: false, message: "One or more judges not found" });
         }
-        const bout = await boutRepo.update({ id }, {
+
+        Object.assign(bout, {
             red_corner_fighter: redFighter,
             blue_corner_fighter: blueFighter,
             event: boutEvent,
@@ -133,18 +140,15 @@ export const updateBout = async (req: Request, res: Response) => {
             is_co_main_event
         });
 
+        await boutRepo.save(bout);
+
         res.status(200).json({
             success: true,
             message: "Bout updated successfully",
             data: bout
         });
-    }
-    catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Error updating bout",
-            error
-        });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error updating bout", error });
     }
 };
 
