@@ -1,8 +1,12 @@
 import { AppDataSource } from "../lib/data-source.js";
 import { Request, Response } from "express";
 import { RoundScore } from "../entities/RoundScore.js";
+import { Official } from "../entities/Official.js";
+import { Round } from "../entities/Round.js";
 
 const roundScoreRepo = AppDataSource.getRepository(RoundScore);
+const roundRepo = AppDataSource.getRepository(Round);
+const officialRepo = AppDataSource.getRepository(Official);
 
 export const getRoundScores = async (req: Request, res: Response) => {
     const roundScores = await roundScoreRepo.find();
@@ -11,8 +15,20 @@ export const getRoundScores = async (req: Request, res: Response) => {
 
 export const createRoundScore = async (req: Request, res: Response) => {
     try {
-        const {red_score, blue_score} = req.body;
+        const { round, official, red_score, blue_score } = req.body;
+
+        const scoreRound = await roundRepo.findOneBy({ id: round });
+        if (!scoreRound) {
+            return res.status(404).json({ success: false, message: "Round not found" });
+        }
+        const scoreOfficial = await officialRepo.findOneBy({ id: official });
+        if (!scoreOfficial) {
+            return res.status(404).json({ success: false, message: "Official not found" });
+        }
+
         const roundScore = roundScoreRepo.create({
+            round: scoreRound,
+            official: scoreOfficial,
             red_score,
             blue_score
         });
@@ -40,7 +56,10 @@ export const updateRoundScore = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
         const { red_score, blue_score } = req.body;
-        const roundScore = await roundScoreRepo.findOne({ where: { id } });
+        const roundScore = await roundScoreRepo.findOne({
+            where: { id },
+            relations: { round: true, official: true }
+        });
         if (!roundScore) {
             return res.status(404).json({ success: false, message: "Round score not found" });
         }

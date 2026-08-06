@@ -86,13 +86,32 @@ export const getBoutById = async (req: Request, res: Response) => {
                 event: true,
                 referee: true,
                 judges: true,
-                rounds: true
+                rounds: {
+                    scores: {
+                        official: true
+                    }
+                }
             }
         });
         if (!bout) {
             return res.status(404).json({ success: false, message: "Bout not found" });
         }
-        res.status(200).json({ success: true, message: "Bout found", data: bout });
+        const responseData = {
+            ...bout,
+            rounds: bout.rounds.map((round) => ({
+                id: round.id,
+                round_number: round.round_number,
+                red_knockdown: round.red_knockdown,
+                blue_knockdown: round.blue_knockdown,
+                judges_scores: round.scores.map((score) => ({
+                    judge_name: score.official.name,
+                    red_score: score.red_score,
+                    blue_score: score.blue_score
+                }))
+            }))
+        };
+
+        res.status(200).json({ success: true, message: "Bout found", data: responseData });
     } catch (error) {
         res.status(500).json({ success: false, message: "Error fetching bout", error });
     }
