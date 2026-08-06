@@ -77,6 +77,8 @@ GET    /bouts
 GET    /bouts/:id
 PUT    /bouts/:id
 DELETE /bouts/:id
+PUT    /bouts/:id/stoppage
+GET    /bouts/:id/result
 
 NOTE: red_corner_fighter, blue_corner_fighter, event, referee are IDs (numbers).
 judges is an array of IDs. All referenced IDs must already exist
@@ -95,6 +97,25 @@ POST /bouts body:
   "no_of_rounds": 4,
   "round_time": 180
 }
+
+PUT /bouts/:id/stoppage body:
+(use this when a bout ends early by KO/TKO instead of going to the judges' scorecards)
+{
+  "winner": "blue",
+  "win_method": "tko",
+  "ending_round": 1
+}
+winner: "red" | "blue"
+win_method: "tko" | "ko"
+ending_round: the round number the bout ended in
+
+GET /bouts/:id/result
+No body needed. Returns the calculated winner:
+- If the bout has a recorded stoppage (tko/ko), returns that directly.
+- Otherwise, calculates from judges' RoundScore totals:
+  winner: "red" | "blue" | "draw"
+  method: "decision"
+  decisionType: "unanimous" | "split" | "majority" | "majority_draw" | "split_draw"
 
 
 -------------------------------------------------------
@@ -148,3 +169,6 @@ GENERAL RULES
 5. In Thunder Client, use Environment variables to store IDs
    returned from create requests (e.g. {{fighter1_id}}) and reuse
    them in later request bodies instead of copying numbers by hand.
+6. A bout that ends by stoppage (KO/TKO) should skip scoring the
+   remaining rounds - use PUT /bouts/:id/stoppage instead of
+   creating RoundScore records for rounds that never happened.

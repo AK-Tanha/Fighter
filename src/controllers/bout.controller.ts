@@ -75,6 +75,109 @@ export const createBout = async (req: Request, res: Response) => {
     }
 };
 
+
+/* bout result */
+
+async function determineWinner(boutId: number) {
+    const bout = await boutRepo.findOne({
+        where: { id: boutId },
+        relations: { rounds: { scores: { official: true } } }
+    });
+    if (!bout) throw new Error('Bout not found');
+
+    if (bout.win_method === 'tko' || bout.win_method === 'ko') {
+        return { winner: bout.winner, method: bout.win_method, ending_round: bout.ending_round };
+    }
+
+    const judgeTotals: Record<number, { name: string; red: number; blue: number }> = {};
+    for (const round of bout.rounds) {
+        for (const score of round.scores) {
+            const oid = score.official.id;
+            if (!judgeTotals[oid]) judgeTotals[oid] = { name: score.official.name, red: 0, blue: 0 };
+            judgeTotals[oid].red += score.red_score;
+            judgeTotals[oid].blue += score.blue_score;
+        }
+    }
+
+    // Each judge's individual verdict
+    const verdicts = Object.values(judgeTotals).map((j) => {
+        if (j.red > j.blue) return 'red';
+        if (j.blue > j.red) return 'blue';
+        return 'draw';
+    });
+
+    const redCount = verdicts.filter((v) => v === 'red').length;
+    const blueCount = verdicts.filter((v) => v === 'blue').length;
+    const drawCount = verdicts.filter((v) => v === 'draw').length;
+
+    let winner: 'red' | 'blue' | 'draw';
+    let decisionType: 'unanimous' | 'split' | 'majority' | 'majority_draw' | 'split_draw';
+
+    if (redCount === 3 || blueCount === 3) {
+        winner = redCount === 3 ? 'red' : 'blue';
+        decisionType = 'unanimous';
+    } else if (redCount === 2 && drawCount === 1) {
+        winner = 'red';
+        decisionType = 'majority';
+    } else if (blueCount === 2 && drawCount === 1) {
+        winner = 'blue';
+        decisionType = 'majority';
+    } else if (redCount === 2 && blueCount === 1) {
+        winner = 'red';
+        decisionType = 'split';
+    } else if (blueCount === 2 && redCount === 1) {
+        winner = 'blue';
+        decisionType = 'split';
+    } else if (drawCount === 2) {
+        winner = 'draw';
+        decisionType = 'majority_draw';
+    } else if (redCount === 1 && blueCount === 1 && drawCount === 1) {
+        winner = 'draw';
+        decisionType = 'split_draw';
+    } else {
+        // drawCount === 3
+        winner = 'draw';
+        decisionType = 'unanimous' as any; // "unanimous draw" — see note below
+    }
+
+    return { winner, method: 'decision', decisionType, judgeTotals };
+};
+
+export const recordStoppage = async (req: Request, res: Response) => {
+    try {
+        const id = Number(req.params.id);
+        const { winner, win_method, ending_round } = req.body;
+        // winner: 'red' | 'blue', win_method: 'tko' | 'ko'
+
+        const bout = await boutRepo.findOne({ where: { id } });
+        if (!bout) {
+            return res.status(404).json({ success: false, message: "Bout not found" });
+        }
+
+        Object.assign(bout, { winner, win_method, ending_round, is_completed: true });
+        await boutRepo.save(bout);
+
+        res.status(200).json({ success: true, message: "Stoppage recorded", data: bout });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error recording stoppage" });
+    }
+};
+
+/* get bout result */
+export const getBoutResult = async (req: Request, res: Response) => {
+    try {
+        const id = Number(req.params.id);
+        const result = await determineWinner(id);
+        res.status(200).json({ success: true, message: "Result calculated", data: result });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error calculating result" });
+    }
+};
+
+
+
+/* get bout by id */
+
 export const getBoutById = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);

@@ -48,4 +48,19 @@ export class Bout {
   @OneToMany(() => Round, (round) => round.bout)
   rounds!: Round[];
 
+  @Column({ type: 'varchar', nullable: true })
+  winner!: 'red' | 'blue' | 'draw' | null;
+
+  @Column({ type: 'varchar', nullable: true })
+  win_method!: 'decision' | 'tko' | 'ko' | 'draw' | null;
+
+  @Column({ type: 'int', nullable: true })
+  ending_round!: number | null; // which round it ended in, if stopped early
+
+  @Column({ type: 'boolean', default: false })
+  is_completed!: boolean;
+
+  @Column({ type: 'varchar', nullable: true })
+  decision_type!: 'unanimous' | 'split' | 'majority' | 'majority_draw' | 'split_draw' | null;
+
 }
