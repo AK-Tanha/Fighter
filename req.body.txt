@@ -1,0 +1,150 @@
+FIGHTER API - THUNDER CLIENT REQUEST BODY REFERENCE
+=====================================================
+Base URL: http://localhost:5000/api
+(adjust port if different)
+
+Set Body tab to "JSON" in Thunder Client for every POST/PUT request.
+
+
+-------------------------------------------------------
+FIGHTER
+-------------------------------------------------------
+POST   /fighters
+GET    /fighters
+GET    /fighters/:id
+PUT    /fighters/:id
+DELETE /fighters/:id
+
+POST /fighters body:
+{
+  "name": "Mohammad Karim",
+  "nickname": "The Bengal Tiger",
+  "nationality": "Bangladeshi",
+  "club": "Dhaka Fight Club",
+  "date_of_birth": "1996-03-14",
+  "weight_class": "Lightweight",
+  "gender": "male",
+  "weight": {
+    "value": 60,
+    "updated_at": "2026-08-06"
+  }
+}
+
+
+-------------------------------------------------------
+OFFICIAL
+-------------------------------------------------------
+POST   /officials
+GET    /officials
+GET    /officials/:id
+PUT    /officials/:id
+DELETE /officials/:id
+
+POST /officials body:
+{
+  "name": "AK Tanha",
+  "nationality": "Bangladeshi",
+  "date_of_birth": "1992-08-25",
+  "is_active": true,
+  "certified_roles": ["referee", "judge"]
+}
+
+
+-------------------------------------------------------
+EVENT
+-------------------------------------------------------
+POST   /events
+GET    /events
+GET    /events/:id
+PUT    /events/:id
+DELETE /events/:id
+
+POST /events body:
+{
+  "title": "Fight Night 12",
+  "sub_title": "Battle of Dhaka",
+  "description": "A night of championship bouts",
+  "date": "2026-09-15",
+  "location": "Dhaka Arena"
+}
+
+
+-------------------------------------------------------
+BOUT
+-------------------------------------------------------
+POST   /bouts
+GET    /bouts
+GET    /bouts/:id
+PUT    /bouts/:id
+DELETE /bouts/:id
+
+NOTE: red_corner_fighter, blue_corner_fighter, event, referee are IDs (numbers).
+judges is an array of IDs. All referenced IDs must already exist
+(create Fighters, an Event, and Officials first).
+
+POST /bouts body:
+{
+  "red_corner_fighter": 1,
+  "blue_corner_fighter": 2,
+  "event": 1,
+  "referee": 1,
+  "judges": [1, 2, 3],
+  "is_title_fight": true,
+  "is_main_event": true,
+  "is_co_main_event": false,
+  "no_of_rounds": 4,
+  "round_time": 180
+}
+
+
+-------------------------------------------------------
+ROUND
+-------------------------------------------------------
+POST   /rounds
+GET    /rounds
+GET    /rounds/:id
+PUT    /rounds/:id
+DELETE /rounds/:id
+
+POST /rounds body:
+{
+  "bout": 1,
+  "round_number": 1,
+  "red_knockdown": false,
+  "blue_knockdown": false
+}
+
+
+-------------------------------------------------------
+ROUND SCORE
+-------------------------------------------------------
+POST   /round-scores
+GET    /round-scores
+GET    /round-scores/:id
+PUT    /round-scores/:id
+DELETE /round-scores/:id
+
+POST /round-scores body:
+{
+  "round": 1,
+  "official": 1,
+  "red_score": 10,
+  "blue_score": 9
+}
+
+
+-------------------------------------------------------
+GENERAL RULES
+-------------------------------------------------------
+1. JSON keys must exactly match what the controller destructures
+   from req.body (case-sensitive).
+2. Relation fields (anything the controller looks up via
+   repo.findOneBy({ id: ... })) must be sent as a plain NUMBER id,
+   never a full object, never a string like "1".
+3. JSON syntax only - double quotes on all keys and string values,
+   no trailing commas, no single quotes, no unquoted keys.
+4. Recommended workflow order to satisfy foreign keys:
+   Fighter -> Official -> Event -> Bout -> Round -> RoundScore
+5. In Thunder Client, use Environment variables to store IDs
+   returned from create requests (e.g. {{fighter1_id}}) and reuse
+   them in later request bodies instead of copying numbers by hand.
