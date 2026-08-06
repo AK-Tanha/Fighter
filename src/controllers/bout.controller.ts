@@ -24,7 +24,7 @@ export const getBouts = async (req: Request, res: Response) => {
 
 export const createBout = async (req: Request, res: Response) => {
     try {
-        const { red_corner_fighter, blue_corner_fighter, event, referee, judges, is_title_fight, is_main_event, is_co_main_event } = req.body;
+        const { red_corner_fighter, blue_corner_fighter, event, referee, judges, is_title_fight, is_main_event, is_co_main_event, no_of_rounds, round_time } = req.body;
         const redFighter = await fighterRepo.findOneBy({ id: red_corner_fighter });
         if (!redFighter) {
             return res.status(404).json({ success: false, message: "Red corner fighter not found" });
@@ -54,7 +54,9 @@ export const createBout = async (req: Request, res: Response) => {
                 judges: boutJudges,
                 is_title_fight,
                 is_main_event,
-                is_co_main_event
+                is_co_main_event,
+                no_of_rounds,
+                round_time
             })
         );
 
@@ -76,32 +78,30 @@ export const createBout = async (req: Request, res: Response) => {
 export const getBoutById = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
-        const bout = await boutRepo.findOneBy({ id });
+        const bout = await boutRepo.findOne({
+            where: { id },
+            relations: {
+                red_corner_fighter: true,
+                blue_corner_fighter: true,
+                event: true,
+                referee: true,
+                judges: true,
+                rounds: true
+            }
+        });
         if (!bout) {
-            return res.status(404).json({
-                success: false,
-                message: "Bout not found"
-            });
+            return res.status(404).json({ success: false, message: "Bout not found" });
         }
-        res.status(200).json({
-            success: true,
-            message: "Bout found",
-            data: bout
-        });
-    }
-    catch (error) {
-        res.status(500).json({
-            success: false,
-            message: "Error fetching bout",
-            error
-        });
+        res.status(200).json({ success: true, message: "Bout found", data: bout });
+    } catch (error) {
+        res.status(500).json({ success: false, message: "Error fetching bout", error });
     }
 };
 
 export const updateBout = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
-        const { red_corner_fighter, blue_corner_fighter, event, referee, judges, is_title_fight, is_main_event, is_co_main_event } = req.body;
+        const { red_corner_fighter, blue_corner_fighter, event, referee, judges, is_title_fight, is_main_event, is_co_main_event, no_of_rounds, round_time } = req.body;
 
         const bout = await boutRepo.findOne({ where: { id } });
         if (!bout) {
@@ -137,7 +137,9 @@ export const updateBout = async (req: Request, res: Response) => {
             judges: boutJudges,
             is_title_fight,
             is_main_event,
-            is_co_main_event
+            is_co_main_event,
+            no_of_rounds,
+            round_time
         });
 
         await boutRepo.save(bout);

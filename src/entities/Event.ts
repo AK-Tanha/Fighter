@@ -1,4 +1,4 @@
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from "typeorm";
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, CreateDateColumn, UpdateDateColumn } from "typeorm";
 import { Bout } from "./Bout.js";
 
 @Entity()
@@ -18,22 +18,15 @@ export class Event {
     @Column({ type: 'date' })
     date!: string;
 
-    @OneToMany(() => Bout, (bout) => bout.event) 
-    bouts!: Bout[];
-
     @Column({ type: 'varchar' })
     location!: string;
 
-    @Column({ type: 'simple-array', nullable: true })
-    bout_ids!: string[];
+    @OneToMany(() => Bout, (bout) => bout.event) 
+    bouts!: Bout[];
 
-    @Column({ type: 'numeric'})
-    total_bouts!: number;
+    @CreateDateColumn()
+    created_at!: Date;
 
-    @Column({ type: 'date' })
-    created_at!: string;
-
-    @Column({ type: 'date' })
-    updated_at!: string;
-
+    @UpdateDateColumn()
+    updated_at!: Date;
 }

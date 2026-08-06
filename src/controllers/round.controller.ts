@@ -28,7 +28,9 @@ export const createRound = async (req: Request, res: Response) => {
 export const getRoundById = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
-        const round = await roundRepo.findOne({ where: { id } });
+        const round = await roundRepo.findOne({ where: { id },
+            relations: { bout: true, scores: true }
+        });
         if (!round) {
             return res.status(404).json({ success: false, message: "Round not found" });
         }

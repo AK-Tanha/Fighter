@@ -1,8 +1,10 @@
 import { Request, Response } from "express";
 import { AppDataSource } from "../lib/data-source.js";
 import { Event } from "../entities/Event.js";
+import { Bout } from "../entities/Bout.js";
 
 const eventRepo = AppDataSource.getRepository(Event);
+const boutRepo = AppDataSource.getRepository(Bout);
 
 export const getEvents = async (req: Request, res: Response) => {
     try {
@@ -37,7 +39,10 @@ export const getEventById = async (req: Request, res: Response) => {
     try {
         const id = Number(req.params.id);
         const event = await eventRepo.findOne({
-            where: { id }
+            where: { id },
+            relations: {
+                bouts: true
+            }
         });
         if (!event) {
             return res.status(404).json({ success: false, message: "Event not found" });
